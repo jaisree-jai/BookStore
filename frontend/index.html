@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <title>dhbj</title>
+    <h1>this</h1>
+    <button id="getbooks">GET BOOKS</button>
+    <button id="addbooks">ADD BOOKS</button>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <form id="createBook">
+        <input type="text" id="nameBox" placeholder="Enter name">
+        <input type="text" id="authorBox" placeholder="Enter author">
+        <input type="number" id="priceBox" placeholder="Enter price">
+        <button type="submit" id="sendData">Send Data</button>
+    </form>
+    <script>
+        const fetchbooks = document.getElementById('getbooks');
+        const addbooks = document.getElementById('addbooks');
+        const bookform = document.getElementById("createBook");
+
+        const nameBox = document.getElementById('nameBox');
+        const authorBox = document.getElementById('authorBox');
+        const priceBox = document.getElementById('priceBox');
+
+
+
+        bookform.style.display = 'none';
+
+        fetchbooks.addEventListener('click', () => {
+            fetch("/api/books/getbooks")
+                .then(response => response.json())
+                .then(data => {
+                    displayDataInTable(data);
+                })
+                .catch(err => console.log(err));
+        });
+
+        addbooks.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (bookform.style.display === 'none') {
+                bookform.style.display = 'block';
+            }
+        });
+
+        const sendData = document.getElementById('sendData');
+        bookform.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const input1 = nameBox.value;
+            const input2 = authorBox.value;
+            const input3 = parseInt(priceBox.value);
+            const data = {
+                name: input1,
+                author: input2,
+                price: input3,
+            };
+            fetch('/api/books/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            }).then(response => {
+                console.log(response.json());
+            }).catch(er => {
+                alert(er);
+            });
+
+        });
+
+        function displayDataInTable(data) {
+            const table = document.getElementById('data-table');
+            const tbody = table.getElementsByTagName('tbody')[0];
+
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                const fieldsToDisplay = ['name', 'author', 'price'];
+                fieldsToDisplay.forEach(field => {
+                    const cell = row.insertCell();
+                    cell.textContent = item[field];
+
+
+                });
+                const deleteCell = row.insertCell();
+                const deleteElement = document.createElement("button");
+                deleteElement.textContent = "Delete";
+                deleteCell.appendChild(deleteElement); 
+
+                deleteCell.addEventListener('click', (event) => {
+                    const confirmation = confirm("Are you sure you want to delete this item?");
+                    if (confirmation) {
+                        const row = event.target.closest('tr');
+                        const itemId = row.dataset.itemId;
+                        // console.log();
+                        console.log(item);
+                        const deletedata = item["name"];
+                        const datadel = {
+                            "name": deletedata,
+                        };
+                        fetch("/api/books/delete", {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(datadel),
+                        }).then(response => {
+                                if (response.status === 200) {
+                                    row.remove();
+                                } else {
+                                    console.error('Error deleting book');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    }
+                });
+
+            });
+
+
+
+        }
+
+    </script>
+</body>
+
+</html>

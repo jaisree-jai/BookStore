@@ -1,5 +1,5 @@
 const mongoose=require("mongoose");
-CONNECTION_STRING="mongodb+srv://19euit060:jais1227@jaisree.ki49iig.mongodb.net/Contact?retryWrites=true&w=majority";
+CONNECTION_STRING="";
 
 const connectDb = async() =>{
     try{
